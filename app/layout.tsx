@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://mc-jvila-oficial.free-panda-5794.chatgpt.site"),
+  metadataBase: new URL("https://mc-jvila-oficial.sandrocagliari1979.chatgpt.site"),
   title: "MC JVILA | Site Oficial",
   description: "Site oficial de MC JVILA. Música, lançamentos, agenda de shows, vídeos e novidades.",
   alternates: { canonical: "/" },
@@ -43,7 +43,7 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "MusicGroup",
               name: "MC JVILA",
-              url: "https://mc-jvila-oficial.free-panda-5794.chatgpt.site",
+              url: "https://mc-jvila-oficial.sandrocagliari1979.chatgpt.site",
               sameAs: ["https://www.instagram.com/mc.jvila/"],
               genre: "Funk brasileiro",
             }).replace(/</g, "\\u003c"),
