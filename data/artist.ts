@@ -15,7 +15,7 @@ export const artist: Artist = {
   shortName: "JVILA",
   tagline: "É O J DE NOVO.",
   instagram: "https://www.instagram.com/mc.jvila/",
-  spotify: "",
+  spotify: "https://open.spotify.com/artist/2f8xoxornfSw6ePzgyM9NO",
   youtube: "",
   tiktok: "",
   bookingWhatsapp: "",

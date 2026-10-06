@@ -2,14 +2,14 @@
 
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { Menu, Pause, Play, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Lenis from "lenis";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { artist, navigation } from "@/data/artist";
 import { releases } from "@/data/releases";
-import { shows } from "@/data/shows";
+import { shows, showsDisclaimer } from "@/data/shows";
 
 const HeroScene = dynamic(() => import("@/components/three/HeroScene"), { ssr: false });
 const gallery = Array.from({ length: 8 }, (_, index) => ({
@@ -108,27 +108,19 @@ function PlatformLinks({ links }: { links: (typeof releases)[number]["links"] })
 }
 
 function MusicPlayer({ active }: { active: number }) {
-  const [playing, setPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
-  useEffect(() => {
-    if (!playing) return;
-    const timer = window.setInterval(() => setProgress((value) => (value >= 99.6 ? 0 : value + 0.4)), 120);
-    return () => window.clearInterval(timer);
-  }, [playing]);
   const track = releases[active];
-  const seconds = Math.floor((progress / 100) * 168);
 
   return (
-    <div className="player" data-cursor={playing ? "PAUSE" : "PLAY"}>
-      <button className="player__toggle" onClick={() => setPlaying((value) => !value)} aria-label={playing ? "Pausar visualização" : "Reproduzir visualização"}>
-        {playing ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" />}
-      </button>
-      <div className="player__meta"><span>AGORA</span><strong>{track.title}</strong><small>{track.artist}</small></div>
-      <div className={`waveform ${playing ? "is-playing" : ""}`} aria-hidden="true">
-        {Array.from({ length: 32 }, (_, index) => <i key={index} style={{ "--bar": `${18 + ((index * 17) % 70)}%`, "--delay": `${index * -0.04}s` } as React.CSSProperties} />)}
-      </div>
-      <div className="player__timeline"><span style={{ width: `${progress}%` }} /></div>
-      <time>{String(Math.floor(seconds / 60)).padStart(2, "0")}:{String(seconds % 60).padStart(2, "0")}</time>
+    <div className="spotify-player" data-cursor="PLAY">
+      <div className="spotify-player__meta"><span>OUÇA AGORA</span><strong>{track.title}</strong><small>{track.artist}</small></div>
+      <iframe
+        title={`Ouvir ${track.title} no Spotify`}
+        src={track.embedUrl}
+        width="100%"
+        height="152"
+        loading="lazy"
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+      />
     </div>
   );
 }
@@ -254,11 +246,11 @@ export default function Experience() {
           <div className="section-kicker"><span>01</span> ÚLTIMO LANÇAMENTO</div>
           <div className="latest__heading"><h2 id="latest-title"><span data-reveal>LATEST</span><span data-reveal>DROP</span></h2><p>Som de rua em escala máxima. Um novo capítulo começa aqui.</p></div>
           <div className="latest__grid">
-            <button className="cover-object" aria-label="Selecionar lançamento mais recente" onClick={() => setActiveRelease(0)} data-cursor="PLAY">
-              <Image src={releases[0].image} alt="Capa provisória do lançamento Novo Drop" fill sizes="(max-width: 700px) 84vw, 42vw" />
+            <a className="cover-object" aria-label={`Ouvir ${releases[0].title} no Spotify`} href={releases[0].links.spotify} target="_blank" rel="noreferrer" data-cursor="PLAY">
+              <Image src={releases[0].image} alt={`Capa oficial de ${releases[0].title}`} fill sizes="(max-width: 700px) 84vw, 42vw" />
               <span className="cover-object__chrome">JVILA</span><span className="cover-object__stamp">NEW<br />2026</span>
-            </button>
-            <div className="latest__info"><span>001 / 004</span><h3>{releases[0].title}</h3><p>{releases[0].artist}</p><p>{releases[0].year}</p><PlatformLinks links={releases[0].links} /><small>CAPA E LINKS PROVISÓRIOS — SUBSTITUA PELOS ASSETS OFICIAIS</small></div>
+            </a>
+            <div className="latest__info"><span>001 / 004</span><h3>{releases[0].title}</h3><p>{releases[0].artist}</p><p>{releases[0].year}</p><PlatformLinks links={releases[0].links} /><small>CAPA E PLAYER OFICIAIS FORNECIDOS PELO SPOTIFY</small></div>
           </div>
         </section>
 
@@ -266,9 +258,9 @@ export default function Experience() {
           <div className="section-kicker"><span>02</span> CATÁLOGO</div>
           <h2 id="discography-title"><span data-reveal>DISCO</span><span data-reveal>GRAFIA</span></h2>
           <div className="discography__rail" aria-label="Lançamentos — arraste horizontalmente" data-cursor="DRAG">
-            {releases.map((release, index) => <button key={release.id} className={`release-card ${activeRelease === index ? "is-active" : ""}`} onClick={() => setActiveRelease(index)} aria-pressed={activeRelease === index}><span className="release-card__number">0{index + 1}</span><Image src={release.image} alt={`Capa provisória de ${release.title}`} fill sizes="280px" /><span className="release-card__veil" /><strong>{release.title}</strong><small>{release.year}</small></button>)}
+            {releases.map((release, index) => <button key={release.id} className={`release-card ${activeRelease === index ? "is-active" : ""}`} onClick={() => setActiveRelease(index)} aria-pressed={activeRelease === index}><span className="release-card__number">0{index + 1}</span><Image src={release.image} alt={`Capa oficial de ${release.title}`} fill sizes="280px" /><span className="release-card__veil" /><strong>{release.title}</strong><small>{release.year}</small></button>)}
           </div>
-          <MusicPlayer key={activeRelease} active={activeRelease} />
+          <MusicPlayer active={activeRelease} />
         </section>
 
         <section className="manifesto" aria-label="Manifesto de MC JVILA">
@@ -281,7 +273,7 @@ export default function Experience() {
 
         <section className="gallery section" id="galeria" aria-labelledby="gallery-title">
           <div className="section-kicker"><span>03</span> VISUAL ARCHIVE</div>
-          <div className="gallery__heading"><h2 id="gallery-title"><span data-reveal>NO FLASH.</span><span data-reveal>SEM AVISO.</span></h2><p>Uma sequência editorial provisória. Fotografias oficiais podem substituir cada quadro sem alterar a composição.</p></div>
+          <div className="gallery__heading"><h2 id="gallery-title"><span data-reveal>NO FLASH.</span><span data-reveal>SEM AVISO.</span></h2><div><p>A galeria aguarda fotografias oficiais licenciadas. Enquanto isso, acompanhe as fotos e vídeos publicados pelo artista.</p><a className="gallery__instagram" href={artist.instagram} target="_blank" rel="noreferrer" data-cursor="OPEN">VER INSTAGRAM OFICIAL</a></div></div>
           <div className="gallery__grid">
             {gallery.map((image, index) => <button className={`gallery__item gallery__item--${index + 1}`} key={image.id} onClick={() => setLightbox(index)} data-cursor="VIEW"><Image src={image.src} alt={image.alt} fill sizes="(max-width: 700px) 92vw, 50vw" loading="lazy" style={{ objectPosition: `${20 + (index * 13) % 70}% center` }} /><span>0{index + 1}</span></button>)}
           </div>
@@ -293,6 +285,7 @@ export default function Experience() {
           <div className="shows__list">
             {shows.map((show, index) => <article className="show-row" key={`${show.city}-${index}`}><time>{show.date}</time><div><strong>{show.city}</strong><span>{show.venue}</span></div><b>{show.state}</b>{show.tickets ? <a href={show.tickets} target="_blank" rel="noreferrer">INGRESSOS</a> : <span className="show-row__soon">EM BREVE</span>}</article>)}
           </div>
+          <p className="shows__note">{showsDisclaimer}</p>
         </section>
 
         <section className="booking" id="booking" aria-labelledby="booking-title">

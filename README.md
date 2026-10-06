@@ -28,23 +28,25 @@ npm run build
 ## Conteúdo centralizado
 
 - `data/artist.ts`: nome, Instagram, Spotify, YouTube, TikTok, WhatsApp e e-mail de booking.
-- `data/releases.ts`: lançamentos, capas, anos e links de streaming.
-- `data/shows.ts`: agenda. O arquivo possui um comentário indicando onde substituir os dados provisórios.
+- `data/releases.ts`: lançamentos, capas oficiais via Spotify, embeds e links de streaming.
+- `data/shows.ts`: agenda pesquisada em páginas públicas de venda/produção. Confirme periodicamente eventuais alterações ou cancelamentos.
 
 URLs não ficam espalhadas nos componentes. Quando um link ainda está vazio, a interface exibe “em breve” e não inventa um destino.
 
 ## Substituindo os assets provisórios
 
 - Foto principal: coloque a fotografia oficial/licenciada em `public/images/artist/` e atualize as referências em `components/Experience.tsx`.
-- Capas: salve em `public/images/releases/` e altere `image` em `data/releases.ts`.
+- Capas: atualmente são servidas pelo Spotify oEmbed. Para usar arquivos próprios/licenciados, salve em `public/images/releases/` e altere `image` em `data/releases.ts`.
 - Galeria: salve em `public/images/gallery/` e atualize o array `gallery` no início de `components/Experience.tsx`.
-- Músicas/previews: coloque em `public/audio/` e conecte o player em `components/Experience.tsx`. Sem áudio oficial, o player atual usa uma visualização simulada e honesta.
+- Músicas/previews: o player atual é o embed oficial do Spotify. Para áudio hospedado pelo artista, coloque arquivos licenciados em `public/audio/` e conecte-os em `components/Experience.tsx`.
 - Vídeos: use `public/videos/`.
 - Modelos 3D: use `public/models/`.
 - Logo: substitua as camadas tipográficas de `components/three/ChromeLogo.tsx` por um modelo GLB/GLTF, se houver um logo 3D oficial.
 - Favicon: `public/favicon.svg`.
 
 O asset `hero-placeholder-final.webp` é uma imagem original, anônima e provisória gerada para esta primeira versão. Ele não representa nem imita o artista.
+
+O Instagram público não oferece o feed completo sem autenticação/OEmbed autorizado. Por isso o site aponta para o perfil oficial e mantém placeholders na galeria em vez de copiar fotografias protegidas. Substitua-os por arquivos oficiais/licenciados quando disponíveis.
 
 ## Three.js e performance
 
