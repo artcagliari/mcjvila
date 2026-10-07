@@ -5,9 +5,8 @@ Experiência digital cinematográfica para MC JVILA, construída como uma narrat
 ## Stack
 
 - Next.js, React, TypeScript e Tailwind CSS
-- Three.js, React Three Fiber e Drei para a cena do hero
-- GSAP + ScrollTrigger para animações espaciais de scroll
-- Lenis para smooth scroll
+- Hero chrome em CSS com fotografia oficial remota e movimento leve
+- IntersectionObserver e `requestAnimationFrame` apenas onde necessário
 - Lucide para controles essenciais
 
 ## Rodando localmente
@@ -35,31 +34,21 @@ URLs não ficam espalhadas nos componentes. Quando um link ainda está vazio, a 
 
 ## Substituindo os assets provisórios
 
-- Foto principal: coloque a fotografia oficial/licenciada em `public/images/artist/` e atualize as referências em `components/Experience.tsx`.
+- Foto principal: o hero usa o retrato publicado no perfil oficial do artista na GR6. Para produção definitiva, substitua por um arquivo original/licenciado em `public/images/artist/`.
 - Capas: atualmente são servidas pelo Spotify oEmbed. Para usar arquivos próprios/licenciados, salve em `public/images/releases/` e altere `image` em `data/releases.ts`.
 - Galeria: salve em `public/images/gallery/` e atualize o array `gallery` no início de `components/Experience.tsx`.
 - Músicas/previews: o player atual é o embed oficial do Spotify. Para áudio hospedado pelo artista, coloque arquivos licenciados em `public/audio/` e conecte-os em `components/Experience.tsx`.
 - Vídeos: use `public/videos/`.
-- Modelos 3D: use `public/models/`.
-- Logo: substitua as camadas tipográficas de `components/three/ChromeLogo.tsx` por um modelo GLB/GLTF, se houver um logo 3D oficial.
+- Logo: a marca chrome é composta em CSS; substitua o texto em `components/Experience.tsx` se houver um logo oficial.
 - Favicon: `public/favicon.svg`.
 
-O asset `hero-placeholder-final.webp` é uma imagem original, anônima e provisória gerada para esta primeira versão. Ele não representa nem imita o artista.
+O asset `hero-placeholder-final.webp` permanece como imagem provisória na galeria e em outras áreas secundárias; ele não representa nem imita o artista.
 
 O Instagram público não oferece o feed completo sem autenticação/OEmbed autorizado. Por isso o site aponta para o perfil oficial e mantém placeholders na galeria em vez de copiar fotografias protegidas. Substitua-os por arquivos oficiais/licenciados quando disponíveis.
 
-## Three.js e performance
+## Hero e performance
 
-A cena está separada em:
-
-- `HeroScene.tsx`: Canvas, luzes e Environment procedural.
-- `ChromeLogo.tsx`: logotipo multicamada com profundidade e material metálico.
-- `Particles.tsx`: campo de partículas leve.
-- `CameraRig.tsx`: câmera reativa ao ponteiro.
-
-O Canvas limita DPR, reduz partículas no mobile e abaixa qualidade quando detecta queda de performance. `prefers-reduced-motion` remove movimentos intensos, smooth scroll e partículas dispensáveis.
-
-Para reduzir efeitos 3D ainda mais, diminua `count` em `HeroScene.tsx`, limite `dpr` a `1`, remova um dos spotlights ou substitua o Canvas por uma imagem estática no mobile.
+O hero usa fotografia otimizada, tipografia chrome em CSS e uma transformação de scroll controlada por um único `requestAnimationFrame`. Não há Canvas/WebGL contínuo na home. O restante das entradas usa `IntersectionObserver`, e `prefers-reduced-motion` remove movimentos dispensáveis. A intro também é curta e não se repete na mesma sessão.
 
 ## Deploy
 

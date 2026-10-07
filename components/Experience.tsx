@@ -1,17 +1,12 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import Image from "next/image";
 import { Menu, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Lenis from "lenis";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { artist, navigation } from "@/data/artist";
 import { releases } from "@/data/releases";
 import { shows, showsDisclaimer } from "@/data/shows";
 
-const HeroScene = dynamic(() => import("@/components/three/HeroScene"), { ssr: false });
 const gallery = Array.from({ length: 8 }, (_, index) => ({
   id: index + 1,
   src: "/images/artist/hero-placeholder-final.webp",
@@ -40,10 +35,10 @@ function Preloader({ done, reduced }: { done: () => void; reduced: boolean }) {
     const started = performance.now();
     let frame = 0;
     const tick = (now: number) => {
-      const value = Math.min(100, Math.floor(((now - started) / 1900) * 100));
+      const value = Math.min(100, Math.floor(((now - started) / 720) * 100));
       setProgress(value);
       if (value < 100) frame = requestAnimationFrame(tick);
-      else window.setTimeout(done, 430);
+      else window.setTimeout(done, 140);
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
@@ -154,7 +149,16 @@ export default function Experience() {
   const [activeRelease, setActiveRelease] = useState(0);
   const [lightbox, setLightbox] = useState<number | null>(null);
   const [bookingNote, setBookingNote] = useState(false);
-  const finishIntro = useCallback(() => setIntro(false), []);
+  const finishIntro = useCallback(() => {
+    setIntro(false);
+    window.sessionStorage.setItem("jvila-intro-seen", "true");
+  }, []);
+
+  useEffect(() => {
+    if (window.sessionStorage.getItem("jvila-intro-seen") !== "true") return;
+    const timeout = window.setTimeout(() => setIntro(false), 0);
+    return () => window.clearTimeout(timeout);
+  }, []);
 
   useEffect(() => {
     document.documentElement.classList.toggle("menu-open", menuOpen);
@@ -179,24 +183,37 @@ export default function Experience() {
 
   useEffect(() => {
     if (intro) return;
-    gsap.registerPlugin(ScrollTrigger);
-    let lenis: Lenis | undefined;
+    const root = document.documentElement;
+    const revealItems = document.querySelectorAll<HTMLElement>("[data-reveal]");
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { rootMargin: "0px 0px -10%", threshold: 0.08 });
+    revealItems.forEach((item) => observer.observe(item));
+    root.classList.add("reveal-ready");
+
+    const stage = document.querySelector<HTMLElement>(".hero__stage");
     let frame = 0;
-    if (!reduced) {
-      lenis = new Lenis({ duration: 1.05, smoothWheel: true, wheelMultiplier: 0.92 });
-      const raf = (time: number) => { lenis?.raf(time); frame = requestAnimationFrame(raf); };
-      frame = requestAnimationFrame(raf);
-      lenis.on("scroll", ScrollTrigger.update);
-    }
-    const context = gsap.context(() => {
-      gsap.from(".hero__eyebrow, .hero__tagline, .hero__actions", { opacity: 0, y: 28, stagger: 0.12, duration: 1.05, ease: "expo.out" });
-      if (!reduced) {
-        gsap.to(".hero__stage", { scale: 0.72, rotationZ: -2.2, yPercent: 18, opacity: 0.35, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: 1.1 } });
-        gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((element) => gsap.from(element, { yPercent: 105, opacity: 0, duration: 1.2, ease: "expo.out", scrollTrigger: { trigger: element, start: "top 88%" } }));
-        gsap.utils.toArray<HTMLElement>(".gallery__item").forEach((element, index) => gsap.to(element, { yPercent: index % 2 ? -8 : 8, ease: "none", scrollTrigger: { trigger: element, scrub: 1.2 } }));
-      }
-    });
-    return () => { context.revert(); lenis?.destroy(); cancelAnimationFrame(frame); ScrollTrigger.getAll().forEach((trigger) => trigger.kill()); };
+    const updateHero = () => {
+      frame = 0;
+      if (!stage || reduced) return;
+      const progress = Math.min(1, window.scrollY / Math.max(window.innerHeight, 1));
+      stage.style.transform = `translate3d(0, ${progress * 42}px, 0) scale(${1 - progress * 0.14})`;
+      stage.style.opacity = String(1 - progress * 0.58);
+    };
+    const onScroll = () => { if (!frame) frame = requestAnimationFrame(updateHero); };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    updateHero();
+    return () => {
+      observer.disconnect();
+      root.classList.remove("reveal-ready");
+      window.removeEventListener("scroll", onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, [intro, reduced]);
 
   const marquee = useMemo(() => Array.from({ length: 4 }, () => "MC JVILA • É O J DE NOVO • ").join(""), []);
@@ -224,9 +241,16 @@ export default function Experience() {
 
       <main id="conteudo">
         <section className="hero" id="home" aria-labelledby="hero-title">
-          <Image className="hero__image" src="/images/artist/hero-placeholder-final.webp" alt="Retrato editorial provisório e não identificável para MC JVILA" fill priority sizes="100vw" />
+          <Image
+            className="hero__image"
+            src="https://www.gr6.com.br/wp-content/uploads/2026/01/WhatsApp-Image-2026-01-25-at-13.20.22-e1769358085272.jpeg"
+            alt="MC JVILA em retrato oficial"
+            fill
+            priority
+            sizes="100vw"
+          />
           <div className="hero__vignette" />
-          <div className="hero__stage" aria-hidden="true"><HeroScene reducedMotion={reduced} /></div>
+          <div className="hero__stage" aria-hidden="true"><div className="hero__chrome"><span>JVILA</span><i /></div></div>
           <div className="hero__content">
             <p className="hero__eyebrow">MC JVILA <span>— SÃO PAULO, BR</span></p>
             <h1 id="hero-title" className="sr-only">MC JVILA — É o J de novo</h1>
