@@ -9,15 +9,6 @@ export const releases = [
     links: { spotify: "https://open.spotify.com/album/4MsuC0Qn8mMVQD7U9dBpRX", appleMusic: "", youtube: "" },
   },
   {
-    id: "release-02",
-    title: "FILHA DA LUA",
-    artist: "AARON MODESTO, MC JVILA E CONVIDADOS",
-    year: "2026",
-    image: "https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e024e044af279793530886e9dee",
-    embedUrl: "https://open.spotify.com/embed/album/2DlVta5k1PCoLyzWL3EDWS?utm_source=generator&theme=0",
-    links: { spotify: "https://open.spotify.com/album/2DlVta5k1PCoLyzWL3EDWS", appleMusic: "", youtube: "" },
-  },
-  {
     id: "release-03",
     title: "JÁ VIREI LENDA AQUI",
     artist: "MC JVILA",

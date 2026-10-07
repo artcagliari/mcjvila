@@ -7,11 +7,28 @@ import { artist, navigation } from "@/data/artist";
 import { releases } from "@/data/releases";
 import { shows, showsDisclaimer } from "@/data/shows";
 
-const gallery = Array.from({ length: 8 }, (_, index) => ({
-  id: index + 1,
-  src: "/images/artist/hero-placeholder-final.webp",
-  alt: `Imagem editorial provisória ${String(index + 1).padStart(2, "0")} de MC JVILA`,
-}));
+const photos = {
+  portrait: "https://www.gr6.com.br/wp-content/uploads/2026/01/WhatsApp-Image-2026-01-25-at-13.20.22-e1769358085272.jpeg",
+  awardsClose: "https://egobrazil.com.br/wp-content/uploads/2026/01/004ef844-8fa2-49a0-b23c-f9fed030461f.jpeg",
+  awardsGroup: "https://egobrazil.com.br/wp-content/uploads/2026/01/79cd2e93-5042-486e-8116-df73b9633b93.jpeg",
+  awardsPortrait: "https://www.nitronewsbrasil.com.br/wp-content/uploads/2026/01/22012026-1-Copy.jpg",
+  yellowCar: "https://i.ytimg.com/vi/EO3JLF-Upnw/maxresdefault.jpg",
+  whiteCar: "https://i.ytimg.com/vi/GRoCXTli5d4/maxresdefault.jpg",
+  soundCar: "https://i.ytimg.com/vi/PLVKwN4ItYI/maxresdefault.jpg",
+  privateJet: "https://i.ytimg.com/vi/z-5FOxUqn6M/maxresdefault.jpg",
+  live: "https://i.scdn.co/image/ab6761610000e5eb2e7d529e772eb758e00be070",
+} as const;
+
+const gallery = [
+  { id: 1, src: photos.awardsClose, alt: "MC JVILA segura quadros de 220 e 120 milhões", caption: "220M + 120M", position: "center" },
+  { id: 2, src: photos.awardsGroup, alt: "MC JVILA celebra mil shows com a equipe e seus discos", caption: "1.000 SHOWS", position: "center" },
+  { id: 3, src: photos.awardsPortrait, alt: "MC JVILA diante dos quadros de suas conquistas musicais", caption: "30 POR 30", position: "center 38%" },
+  { id: 4, src: photos.yellowCar, alt: "MC JVILA no banco de um carro amarelo no clipe Modernizando", caption: "MODERNIZANDO", position: "center" },
+  { id: 5, src: photos.whiteCar, alt: "MC JVILA ao lado de um carro branco no clipe Meia Noite e Meia", caption: "MEIA NOITE E MEIA", position: "center" },
+  { id: 6, src: photos.soundCar, alt: "MC JVILA ao lado de um carro vermelho equipado com som", caption: "PUXA O LANÇA", position: "center" },
+  { id: 7, src: photos.privateJet, alt: "MC JVILA caminha em direção a um avião particular", caption: "RUMO AO ESTRELATO", position: "center" },
+  { id: 8, src: photos.live, alt: "MC JVILA se apresenta ao vivo", caption: "AO VIVO", position: "center 25%" },
+] as const;
 
 function useReducedMotion() {
   const [reduced, setReduced] = useState(false);
@@ -135,7 +152,10 @@ function Lightbox({ index, onClose, onChange }: { index: number; onClose: () => 
     <div className="lightbox" role="dialog" aria-modal="true" aria-label={`Galeria, imagem ${index + 1} de ${gallery.length}`} onTouchStart={(e) => { touch.current = e.touches[0].clientX; }} onTouchEnd={(e) => { const delta = e.changedTouches[0].clientX - touch.current; if (Math.abs(delta) > 45) onChange(delta > 0 ? (index + gallery.length - 1) % gallery.length : (index + 1) % gallery.length); }}>
       <button className="lightbox__close" onClick={onClose} aria-label="Fechar galeria" autoFocus><X /></button>
       <button className="lightbox__side lightbox__side--left" onClick={() => onChange((index + gallery.length - 1) % gallery.length)} aria-label="Imagem anterior">ANTERIOR</button>
-      <figure><Image src={gallery[index].src} alt={gallery[index].alt} fill sizes="90vw" priority /></figure>
+      <figure>
+        <Image src={gallery[index].src} alt={gallery[index].alt} fill sizes="90vw" priority quality={82} />
+        <figcaption>{gallery[index].caption}</figcaption>
+      </figure>
       <button className="lightbox__side lightbox__side--right" onClick={() => onChange((index + 1) % gallery.length)} aria-label="Próxima imagem">PRÓXIMA</button>
       <p>{String(index + 1).padStart(2, "0")} / {String(gallery.length).padStart(2, "0")}</p>
     </div>
@@ -149,6 +169,8 @@ export default function Experience() {
   const [activeRelease, setActiveRelease] = useState(0);
   const [lightbox, setLightbox] = useState<number | null>(null);
   const [bookingNote, setBookingNote] = useState(false);
+  const railRef = useRef<HTMLDivElement>(null);
+  const railPaused = useRef(false);
   const finishIntro = useCallback(() => {
     setIntro(false);
     window.sessionStorage.setItem("jvila-intro-seen", "true");
@@ -216,6 +238,30 @@ export default function Experience() {
     };
   }, [intro, reduced]);
 
+  useEffect(() => {
+    const rail = railRef.current;
+    if (!rail || reduced || intro) return;
+    rail.scrollLeft = 0;
+    let position = 0;
+    let last = performance.now();
+    let frame = 0;
+    const tick = (now: number) => {
+      const dt = Math.min(now - last, 64);
+      last = now;
+      const loop = rail.scrollWidth / 2;
+      if (railPaused.current || loop <= 0) {
+        position = rail.scrollLeft;
+      } else {
+        position += dt * 0.04;
+        if (position >= loop) position -= loop;
+        rail.scrollLeft = position;
+      }
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [intro, reduced]);
+
   const marquee = useMemo(() => Array.from({ length: 4 }, () => "MC JVILA • É O J DE NOVO • ").join(""), []);
   const bookingHref = artist.bookingWhatsapp ? `https://wa.me/${artist.bookingWhatsapp.replace(/\D/g, "")}` : artist.bookingEmail ? `mailto:${artist.bookingEmail}` : "";
   const socials = [["INSTAGRAM", artist.instagram], ["YOUTUBE", artist.youtube], ["SPOTIFY", artist.spotify], ["TIKTOK", artist.tiktok]] as const;
@@ -231,7 +277,7 @@ export default function Experience() {
       </header>
 
       <div id="main-menu" className={`menu-overlay ${menuOpen ? "is-open" : ""}`} aria-hidden={!menuOpen}>
-        <Image src="/images/artist/hero-placeholder-final.webp" alt="" fill sizes="100vw" className="menu-overlay__image" />
+        <Image src={photos.yellowCar} alt="" fill sizes="100vw" className="menu-overlay__image" quality={72} />
         <div className="menu-overlay__shade" />
         <button onClick={() => setMenuOpen(false)} className="menu-overlay__close" aria-label="Fechar menu"><X /><span>FECHAR</span></button>
         <nav aria-label="Navegação principal">
@@ -243,11 +289,12 @@ export default function Experience() {
         <section className="hero" id="home" aria-labelledby="hero-title">
           <Image
             className="hero__image"
-            src="https://www.gr6.com.br/wp-content/uploads/2026/01/WhatsApp-Image-2026-01-25-at-13.20.22-e1769358085272.jpeg"
+            src={photos.portrait}
             alt="MC JVILA em retrato oficial"
             fill
             priority
             sizes="100vw"
+            quality={78}
           />
           <div className="hero__vignette" />
           <div className="hero__stage" aria-hidden="true"><div className="hero__chrome"><span>JVILA</span><i /></div></div>
@@ -274,21 +321,34 @@ export default function Experience() {
               <Image src={releases[0].image} alt={`Capa oficial de ${releases[0].title}`} fill sizes="(max-width: 700px) 84vw, 42vw" />
               <span className="cover-object__chrome">JVILA</span><span className="cover-object__stamp">NEW<br />2026</span>
             </a>
-            <div className="latest__info"><span>001 / 004</span><h3>{releases[0].title}</h3><p>{releases[0].artist}</p><p>{releases[0].year}</p><PlatformLinks links={releases[0].links} /><small>CAPA E PLAYER OFICIAIS FORNECIDOS PELO SPOTIFY</small></div>
+            <div className="latest__info"><span>001 / {String(releases.length).padStart(3, "0")}</span><h3>{releases[0].title}</h3><p>{releases[0].artist}</p><p>{releases[0].year}</p><PlatformLinks links={releases[0].links} /><small>CAPA E PLAYER OFICIAIS FORNECIDOS PELO SPOTIFY</small></div>
           </div>
         </section>
 
         <section className="discography section" aria-labelledby="discography-title">
           <div className="section-kicker"><span>02</span> CATÁLOGO</div>
           <h2 id="discography-title"><span data-reveal>DISCO</span><span data-reveal>GRAFIA</span></h2>
-          <div className="discography__rail" aria-label="Lançamentos — arraste horizontalmente" data-cursor="DRAG">
-            {releases.map((release, index) => <button key={release.id} className={`release-card ${activeRelease === index ? "is-active" : ""}`} onClick={() => setActiveRelease(index)} aria-pressed={activeRelease === index}><span className="release-card__number">0{index + 1}</span><Image src={release.image} alt={`Capa oficial de ${release.title}`} fill sizes="280px" /><span className="release-card__veil" /><strong>{release.title}</strong><small>{release.year}</small></button>)}
+          <div
+            className="discography__rail"
+            ref={railRef}
+            aria-label="Lançamentos — carrossel automático, arraste horizontalmente"
+            data-cursor="DRAG"
+            onPointerEnter={() => { railPaused.current = true; }}
+            onPointerLeave={() => { railPaused.current = false; }}
+            onTouchStart={() => { railPaused.current = true; }}
+            onTouchEnd={() => window.setTimeout(() => { railPaused.current = false; }, 1500)}
+          >
+            {[...releases, ...releases].map((release, i) => {
+              const index = i % releases.length;
+              const clone = i >= releases.length;
+              return <button key={`${release.id}-${clone ? "clone" : "main"}`} className={`release-card ${activeRelease === index ? "is-active" : ""}`} onClick={() => setActiveRelease(index)} aria-pressed={activeRelease === index} aria-hidden={clone || undefined} tabIndex={clone ? -1 : undefined}><span className="release-card__number">0{index + 1}</span><Image src={release.image} alt={clone ? "" : `Capa oficial de ${release.title}`} fill sizes="280px" /><span className="release-card__veil" /><strong>{release.title}</strong><small>{release.year}</small></button>;
+            })}
           </div>
           <MusicPlayer active={activeRelease} />
         </section>
 
         <section className="manifesto" aria-label="Manifesto de MC JVILA">
-          <Image src="/images/artist/hero-placeholder-final.webp" alt="Retrato editorial provisório em preto e branco" fill sizes="100vw" />
+          <Image src={photos.awardsGroup} alt="MC JVILA celebra seus discos e a marca de mil shows" fill sizes="100vw" quality={76} />
           <div className="manifesto__veil" />
           <p><span data-reveal>DA VILA</span><span data-reveal>PARA O BRASIL.</span></p>
           <p className="manifesto__offset"><span data-reveal>O FUNK</span><span data-reveal>NUNCA PARA.</span></p>
@@ -297,9 +357,9 @@ export default function Experience() {
 
         <section className="gallery section" id="galeria" aria-labelledby="gallery-title">
           <div className="section-kicker"><span>03</span> VISUAL ARCHIVE</div>
-          <div className="gallery__heading"><h2 id="gallery-title"><span data-reveal>NO FLASH.</span><span data-reveal>SEM AVISO.</span></h2><div><p>A galeria aguarda fotografias oficiais licenciadas. Enquanto isso, acompanhe as fotos e vídeos publicados pelo artista.</p><a className="gallery__instagram" href={artist.instagram} target="_blank" rel="noreferrer" data-cursor="OPEN">VER INSTAGRAM OFICIAL</a></div></div>
+          <div className="gallery__heading"><h2 id="gallery-title"><span data-reveal>CONQUISTAS.</span><span data-reveal>SEM LIMITES.</span></h2><div><p>Dos quadros de milhões de plays aos carros que marcaram os clipes: registros reais de uma trajetória em movimento.</p><a className="gallery__instagram" href={artist.instagram} target="_blank" rel="noreferrer" data-cursor="OPEN">VER INSTAGRAM OFICIAL</a></div></div>
           <div className="gallery__grid">
-            {gallery.map((image, index) => <button className={`gallery__item gallery__item--${index + 1}`} key={image.id} onClick={() => setLightbox(index)} data-cursor="VIEW"><Image src={image.src} alt={image.alt} fill sizes="(max-width: 700px) 92vw, 50vw" loading="lazy" style={{ objectPosition: `${20 + (index * 13) % 70}% center` }} /><span>0{index + 1}</span></button>)}
+            {gallery.map((image, index) => <button className={`gallery__item gallery__item--${index + 1}`} key={image.id} onClick={() => setLightbox(index)} data-cursor="VIEW"><Image src={image.src} alt={image.alt} fill sizes="(max-width: 700px) 92vw, 50vw" loading="lazy" quality={72} style={{ objectPosition: image.position }} /><span>0{index + 1}</span><strong>{image.caption}</strong></button>)}
           </div>
         </section>
 

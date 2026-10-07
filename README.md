@@ -36,15 +36,13 @@ URLs não ficam espalhadas nos componentes. Quando um link ainda está vazio, a 
 
 - Foto principal: o hero usa o retrato publicado no perfil oficial do artista na GR6. Para produção definitiva, substitua por um arquivo original/licenciado em `public/images/artist/`.
 - Capas: atualmente são servidas pelo Spotify oEmbed. Para usar arquivos próprios/licenciados, salve em `public/images/releases/` e altere `image` em `data/releases.ts`.
-- Galeria: salve em `public/images/gallery/` e atualize o array `gallery` no início de `components/Experience.tsx`.
+- Galeria: usa registros públicos do projeto “30 por 30” e miniaturas do canal oficial no YouTube. Para produção definitiva, substitua por arquivos originais/licenciados no array `gallery` de `components/Experience.tsx`.
 - Músicas/previews: o player atual é o embed oficial do Spotify. Para áudio hospedado pelo artista, coloque arquivos licenciados em `public/audio/` e conecte-os em `components/Experience.tsx`.
 - Vídeos: use `public/videos/`.
 - Logo: a marca chrome é composta em CSS; substitua o texto em `components/Experience.tsx` se houver um logo oficial.
 - Favicon: `public/favicon.svg`.
 
-O asset `hero-placeholder-final.webp` permanece como imagem provisória na galeria e em outras áreas secundárias; ele não representa nem imita o artista.
-
-O Instagram público não oferece o feed completo sem autenticação/OEmbed autorizado. Por isso o site aponta para o perfil oficial e mantém placeholders na galeria em vez de copiar fotografias protegidas. Substitua-os por arquivos oficiais/licenciados quando disponíveis.
+As imagens editoriais remotas continuam protegidas por direitos autorais de suas fontes. O Instagram público não oferece o feed completo sem autenticação/OEmbed autorizado; por isso o site aponta para o perfil oficial e utiliza apenas registros cuja identidade e página de origem puderam ser verificadas. Substitua-os pelos arquivos oficiais licenciados quando disponíveis.
 
 ## Hero e performance
 

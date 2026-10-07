@@ -16,8 +16,8 @@ export const artist: Artist = {
   tagline: "É O J DE NOVO.",
   instagram: "https://www.instagram.com/mc.jvila/",
   spotify: "https://open.spotify.com/artist/2f8xoxornfSw6ePzgyM9NO",
-  youtube: "",
-  tiktok: "",
+  youtube: "https://www.youtube.com/@mcjvilaoficial",
+  tiktok: "https://www.tiktok.com/@mcjvila",
   bookingWhatsapp: "",
   bookingEmail: "",
 };
